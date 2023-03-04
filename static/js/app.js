@@ -33,17 +33,20 @@ d3.json(url).then( data => {
 
     // getting the whole samples list
     var samples = data.samples;
+
     // fetchiing the samples dictionary whose key matches our current selected ID 
     var result = samples.filter(idObject => idObject.id == current_selected_id)[0];
 
-    var sample_values = result.sample_values;
-    var otu_ids = result.otu_ids;
-    var otu_labels = result.otu_labels;
+    // getting sample values, otu ids and labels slicing top 10 and reversing to get descending order
+    var sample_values = result.sample_values.slice(0,10).reverse();
+    var otu_ids = result.otu_ids.slice(0,10).reverse();
+    var otu_labels = result.otu_labels.slice(0,10).reverse();
 
+    // preparing for plotting
     var trace1 = {
-        x: sample_values.slice(0,10).reverse(),
-        y: otu_ids.slice(0,10).map(otuID => `OTU ${otuID}`).reverse(),
-        text: otu_labels.slice(0,10).reverse(),
+        x: sample_values,
+        y: otu_ids.map(otuID => `OTU ${otuID}`),
+        text: otu_labels,
         name: "Greek",
         type: "bar",
         orientation: "h"
@@ -69,10 +72,12 @@ function bubble_chart(current_selected_id){
         // fetchiing the samples dictionary whose key matches our current selected ID 
         var result = samples.filter(idObject => idObject.id == current_selected_id)[0];
         
+        // getting sample values, otu ids and labels
         var sample_values = result.sample_values;
         var otu_ids = result.otu_ids;
         var otu_labels = result.otu_labels;
-    
+        
+        // preparing for plotting
         var trace1 = {
             x: otu_ids,
             y: sample_values,
@@ -98,13 +103,23 @@ function bubble_chart(current_selected_id){
     });
 }
 
-
+// populating the demographic info chart
+// creating a function
 function demographic_info(current_selected_id){
-d3.json(url).then( data => {
 
+// getting data from API call
+    d3.json(url).then( data => {
+
+    // getting metadata from the array
     let metadata = data.metadata;
+
+    // filtering to get the data for our selected ID
     let result = metadata.filter(sampleObject => sampleObject.id == current_selected_id)[0];
+
+    // selecting the header from HTML
     let meta_location = d3.select("#sample-metadata");
+
+    // populating the HTML with each key, value pair
     meta_location.html("");
     Object.entries(result).forEach(([key, value]) => {
         meta_location.append("h6").text(`${key.toLocaleUpperCase()} : ${value}`)
