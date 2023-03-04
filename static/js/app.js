@@ -1,34 +1,41 @@
+// assigning the url string to a constant
 const url = "https://2u-data-curriculum-team.s3.amazonaws.com/dataviz-classroom/v1.1/14-Interactive-Web-Visualizations/02-Homework/samples.json"
 
+// as the code starts from the init() function so writing the init() function first
 function init(){
 
-// selecting dropdown element
+// selecting dropdown element from html
 let dropdownMenu = d3.select("#selDataset");
 
-// put the ids in the drop downlst
+// put the ids in the drop down list
 
+// making API call to retrieve data 
 d3.json(url).then(function(data) {
 
+    // extracting IDs from JSON and assigning to a variable
     let ids = data.names;
 
-    ids.forEach(element => {
-        dropdownMenu.append("option").text(element).property("value", element);
+    // filling up IDs on the drop down menu
+    ids.forEach(element => {dropdownMenu.append("option").text(element).property("value", element);
+});
 
-    });
+// calling getData() function which will do the rest of the work for us
+getData()});
 
-getData()
-  });
 }
 
 
+// writing function to design bar chart
+function bar_chart(current_selected_id){
 
-function bar_chart(sample){
-
-
+// making API call to retrieve data 
 d3.json(url).then( data => {
 
+    // getting the whole samples list
     var samples = data.samples;
-    var result = samples.filter(sampleObject => sampleObject.id == sample)[0];
+    // fetchiing the samples dictionary whose key matches our current selected ID 
+    var result = samples.filter(idObject => idObject.id == current_selected_id)[0];
+
     var sample_values = result.sample_values;
     var otu_ids = result.otu_ids;
     var otu_labels = result.otu_labels;
@@ -43,18 +50,25 @@ d3.json(url).then( data => {
     };
     var data = [trace1];
     var layout = {
-        title: "Top Ten OTUs for Individual " +sample,
+        title: "Top Ten OTUs for PatientID# " +current_selected_id,
         margin: {l: 100, r: 100, t: 100, b: 100}
     };
     Plotly.newPlot("bar", data, layout);
 
 });}
 
-function bubble_chart(sample){
+// writing function to design bubble chart
+function bubble_chart(current_selected_id){
 
+    // making API call to retrieve data 
     d3.json(url).then( data => {
+
+        // getting the whole samples list
         var samples = data.samples;
-        var result = samples.filter(sampleObject => sampleObject.id == sample)[0];
+
+        // fetchiing the samples dictionary whose key matches our current selected ID 
+        var result = samples.filter(idObject => idObject.id == current_selected_id)[0];
+        
         var sample_values = result.sample_values;
         var otu_ids = result.otu_ids;
         var otu_labels = result.otu_labels;
@@ -73,7 +87,7 @@ function bubble_chart(sample){
           var data = [trace1];
           
           var layout = {
-            title: 'Bubble Chart Hover Text',
+            title: 'OTU ID Bubble Chart',
             showlegend: false,
             height: 600,
             width: 600
@@ -85,11 +99,11 @@ function bubble_chart(sample){
 }
 
 
-function demographic_info(sample){
+function demographic_info(current_selected_id){
 d3.json(url).then( data => {
 
     let metadata = data.metadata;
-    let result = metadata.filter(sampleObject => sampleObject.id == sample)[0];
+    let result = metadata.filter(sampleObject => sampleObject.id == current_selected_id)[0];
     let meta_location = d3.select("#sample-metadata");
     meta_location.html("");
     Object.entries(result).forEach(([key, value]) => {
@@ -101,17 +115,22 @@ d3.json(url).then( data => {
 // On change to the DOM, call getData()
 d3.selectAll("#selDataset").on("change", getData);
 
+// writing getData function to get the current selected item from dropdown menu
 function getData(){
     let dropdownMenu = d3.select("#selDataset");
     let dataset = dropdownMenu.property("value");
 
+// calling updatePlotly function, and passing it the current selected ID from dropdown menu
     updatePlotly(dataset);
 }
 
 function updatePlotly(new_data) {
+    // calling all the required chart making functions and passing them --
+    // -- the current selected ID from dropdown menu
     bar_chart(new_data);
     bubble_chart(new_data);
     demographic_info(new_data)
   }
 
+// this function runs the app
 init();
